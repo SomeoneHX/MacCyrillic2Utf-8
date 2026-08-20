@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文 ⇆ 乱码 双向转换器</title>
+    <!-- Font Awesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --border: #e2e8f0;
+            --radius: 16px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08);
+            --transition: 0.25s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem 2.5rem;
+            transition: box-shadow var(--transition);
+        }
+
+        .container:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        header h1 i {
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .converter {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .input-group, .output-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        label i {
+            color: var(--primary);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            resize: vertical;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            background: #fafbfc;
+            color: var(--text);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1.5rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition), transform var(--transition), box-shadow var(--transition);
+            border: none;
+            color: white;
+            background-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn.secondary {
+            background-color: #f1f5f9;
+            color: #334155;
+            box-shadow: none;
+        }
+
+        .btn.secondary:hover {
+            background-color: #e2e8f0;
+            box-shadow: none;
+        }
+
+        .btn i {
+            font-size: 1rem;
+        }
+
+        .info {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .info h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info h2 i {
+            color: var(--primary);
+        }
+
+        .info p {
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .info code {
+            background: #f1f5f9;
+            padding: 0.15rem 0.4rem;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #0f172a;
+        }
+
+        .related-link {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .related-link .btn {
+            background-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .related-link .btn:hover {
+            background-color: #059669;
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.5rem 1.2rem;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <i class="fa-solid fa-arrows-rotate"></i>
+                中文 ⇆ 乱码 双向转换器
+            </h1>
+            <p>UTF-8 中文与 MacCyrillic 乱码互转，轻松还原“伪西里尔”文字</p>
+        </header>
+
+        <div class="converter">
+            <div class="input-group">
+                <label for="inputText">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    输入文本
+                </label>
+                <textarea id="inputText" placeholder="在此输入正常中文或乱码..."></textarea>
+            </div>
+
+            <div class="actions">
+                <button class="btn" id="toMojibakeBtn" title="将中文编码为 MacCyrillic 乱码">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    转为乱码
+                </button>
+                <button class="btn" id="toChineseBtn" title="将乱码还原为中文">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    转为中文
+                </button>
+                <button class="btn secondary" id="swapBtn" title="交换输入输出内容">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    交换
+                </button>
+                <button class="btn secondary" id="clearBtn" title="清空所有文本框">
+                    <i class="fa-solid fa-eraser"></i>
+                    清空
+                </button>
+            </div>
+
+            <div class="output-group">
+                <label for="outputText">
+                    <i class="fa-solid fa-file-lines"></i>
+                    输出结果
+                </label>
+                <textarea id="outputText" placeholder="转换结果将显示在这里..." readonly></textarea>
+            </div>
+        </div>
+
+        <div class="info">
+            <h2>
+                <i class="fa-solid fa-circle-info"></i>
+                关于本工具
+            </h2>
+            <p>
+                本工具用于在<strong>正常 UTF-8 中文</strong>与<strong> MacCyrillic 编码误读产生的乱码</strong>之间进行双向转换。
+                当 UTF-8 编码的中文字节被错误地按照 MacCyrillic 编码解读时，就会显示为诸如 <code>жЬЙдїїдљХ</code> 这样的“伪西里尔”乱码。
+            </p>
+            <p>
+                转换原理：中文文本先经 UTF-8 编码为字节序列，再使用 MacCyrillic 单字节解码，即可得到乱码；反之，将乱码字符映射回 MacCyrillic 字节，再用 UTF-8 解码，即可还原为中文。
+            </p>
+            <p>
+                这种乱码常见于早期 Mac 系统或某些编码检测错误的场景。只要字节未被破坏，通常都能无损还原。
+            </p>
+
+            <div class="related-link">
+                <a href="https://www.luogu.com.cn/discuss/1359611" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+                    <button class="btn">
+                        <i class="fa-solid fa-book-open"></i>
+                        前情提要
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ============ MacCyrillic 映射表（硬编码，避免依赖 TextDecoder） ============
+            // MacCyrillic 字节 -> 字符 映射表（用于中文转乱码）
+            const macCyrillicByteToChar = {
+                0: "\u0000", 1: "\u0001", 2: "\u0002", 3: "\u0003", 4: "\u0004", 5: "\u0005",
+                6: "\u0006", 7: "\u0007", 8: "\u0008", 9: "\u0009", 10: "\u000a", 11: "\u000b",
+                12: "\u000c", 13: "\u000d", 14: "\u000e", 15: "\u000f", 16: "\u0010", 17: "\u0011",
+                18: "\u0012", 19: "\u0013", 20: "\u0014", 21: "\u0015", 22: "\u0016", 23: "\u0017",
+                24: "\u0018", 25: "\u0019", 26: "\u001a", 27: "\u001b", 28: "\u001c", 29: "\u001d",
+                30: "\u001e", 31: "\u001f", 32: " ", 33: "!", 34: "\u0022", 35: "#", 36: "$",
+                37: "%", 38: "&", 39: "'", 40: "(", 41: ")", 42: "*", 43: "+", 44: ",",
+                45: "-", 46: ".", 47: "/", 48: "0", 49: "1", 50: "2", 51: "3", 52: "4",
+                53: "5", 54: "6", 55: "7", 56: "8", 57: "9", 58: ":", 59: ";", 60: "<",
+                61: "=", 62: ">", 63: "?", 64: "@", 65: "A", 66: "B", 67: "C", 68: "D",
+                69: "E", 70: "F", 71: "G", 72: "H", 73: "I", 74: "J", 75: "K", 76: "L",
+                77: "M", 78: "N", 79: "O", 80: "P", 81: "Q", 82: "R", 83: "S", 84: "T",
+                85: "U", 86: "V", 87: "W", 88: "X", 89: "Y", 90: "Z", 91: "[", 92: "\u005c",
+                93: "]", 94: "^", 95: "_", 96: "`", 97: "a", 98: "b", 99: "c", 100: "d",
+                101: "e", 102: "f", 103: "g", 104: "h", 105: "i", 106: "j", 107: "k", 108: "l",
+                109: "m", 110: "n", 111: "o", 112: "p", 113: "q", 114: "r", 115: "s", 116: "t",
+                117: "u", 118: "v", 119: "w", 120: "x", 121: "y", 122: "z", 123: "{", 124: "|",
+                125: "}", 126: "~", 127: "\u007f",
+                128: "\u0410", 129: "\u0411", 130: "\u0412", 131: "\u0413", 132: "\u0414",
+                133: "\u0415", 134: "\u0416", 135: "\u0417", 136: "\u0418", 137: "\u0419",
+                138: "\u041a", 139: "\u041b", 140: "\u041c", 141: "\u041d", 142: "\u041e",
+                143: "\u041f", 144: "\u0420", 145: "\u0421", 146: "\u0422", 147: "\u0423",
+                148: "\u0424", 149: "\u0425", 150: "\u0426", 151: "\u0427", 152: "\u0428",
+                153: "\u0429", 154: "\u042a", 155: "\u042b", 156: "\u042c", 157: "\u042d",
+                158: "\u042e", 159: "\u042f", 160: "\u2020", 161: "\u00b0", 162: "\u0490",
+                163: "\u00a3", 164: "\u00a7", 165: "\u2022", 166: "\u00b6", 167: "\u0406",
+                168: "\u00ae", 169: "\u00a9", 170: "\u2122", 171: "\u0402", 172: "\u0452",
+                173: "\u2260", 174: "\u0403", 175: "\u0453", 176: "\u221e", 177: "\u00b1",
+                178: "\u2264", 179: "\u2265", 180: "\u0456", 181: "\u00b5", 182: "\u0491",
+                183: "\u0408", 184: "\u0404", 185: "\u0454", 186: "\u0407", 187: "\u0457",
+                188: "\u0409", 189: "\u0459", 190: "\u040a", 191: "\u045a", 192: "\u0458",
+                193: "\u0405", 194: "\u00ac", 195: "\u221a", 196: "\u0192", 197: "\u2248",
+                198: "\u2206", 199: "\u00ab", 200: "\u00bb", 201: "\u2026", 202: "\u00a0",
+                203: "\u040b", 204: "\u045b", 205: "\u040c", 206: "\u045c", 207: "\u0455",
+                208: "\u2013", 209: "\u2014", 210: "\u201c", 211: "\u201d", 212: "\u2018",
+                213: "\u2019", 214: "\u00f7", 215: "\u201e", 216: "\u040e", 217: "\u045e",
+                218: "\u040f", 219: "\u045f", 220: "\u2116", 221: "\u0401", 222: "\u0451",
+                223: "\u044f", 224: "\u0430", 225: "\u0431", 226: "\u0432", 227: "\u0433",
+                228: "\u0434", 229: "\u0435", 230: "\u0436", 231: "\u0437", 232: "\u0438",
+                233: "\u0439", 234: "\u043a", 235: "\u043b", 236: "\u043c", 237: "\u043d",
+                238: "\u043e", 239: "\u043f", 240: "\u0440", 241: "\u0441", 242: "\u0442",
+                243: "\u0443", 244: "\u0444", 245: "\u0445", 246: "\u0446", 247: "\u0447",
+                248: "\u0448", 249: "\u0449", 250: "\u044a", 251: "\u044b", 252: "\u044c",
+                253: "\u044d", 254: "\u044e", 255: "\u20ac"
+            };
+
+            // MacCyrillic 字符 -> 字节 映射表（用于乱码转中文）
+            const macCyrillicCharToByte = {
+                "\u0000": 0, "\u0001": 1, "\u0002": 2, "\u0003": 3, "\u0004": 4, "\u0005": 5,
+                "\u0006": 6, "\u0007": 7, "\u0008": 8, "\u0009": 9, "\u000a": 10, "\u000b": 11,
+                "\u000c": 12, "\u000d": 13, "\u000e": 14, "\u000f": 15, "\u0010": 16, "\u0011": 17,
+                "\u0012": 18, "\u0013": 19, "\u0014": 20, "\u0015": 21, "\u0016": 22, "\u0017": 23,
+                "\u0018": 24, "\u0019": 25, "\u001a": 26, "\u001b": 27, "\u001c": 28, "\u001d": 29,
+                "\u001e": 30, "\u001f": 31, " ": 32, "!": 33, "\u0022": 34, "#": 35, "$": 36,
+                "%": 37, "&": 38, "'": 39, "(": 40, ")": 41, "*": 42, "+": 43, ",": 44,
+                "-": 45, ".": 46, "/": 47, "0": 48, "1": 49, "2": 50, "3": 51, "4": 52,
+                "5": 53, "6": 54, "7": 55, "8": 56, "9": 57, ":": 58, ";": 59, "<": 60,
+                "=": 61, ">": 62, "?": 63, "@": 64, "A": 65, "B": 66, "C": 67, "D": 68,
+                "E": 69, "F": 70, "G": 71, "H": 72, "I": 73, "J": 74, "K": 75, "L": 76,
+                "M": 77, "N": 78, "O": 79, "P": 80, "Q": 81, "R": 82, "S": 83, "T": 84,
+                "U": 85, "V": 86, "W": 87, "X": 88, "Y": 89, "Z": 90, "[": 91, "\u005c": 92,
+                "]": 93, "^": 94, "_": 95, "`": 96, "a": 97, "b": 98, "c": 99, "d": 100,
+                "e": 101, "f": 102, "g": 103, "h": 104, "i": 105, "j": 106, "k": 107, "l": 108,
+                "m": 109, "n": 110, "o": 111, "p": 112, "q": 113, "r": 114, "s": 115, "t": 116,
+                "u": 117, "v": 118, "w": 119, "x": 120, "y": 121, "z": 122, "{": 123, "|": 124,
+                "}": 125, "~": 126, "\u007f": 127,
+                "\u00a0": 202, "\u00a3": 163, "\u00a7": 164, "\u00a9": 169, "\u00ab": 199,
+                "\u00ac": 194, "\u00ae": 168, "\u00b0": 161, "\u00b1": 177, "\u00b5": 181,
+                "\u00b6": 166, "\u00bb": 200, "\u00f7": 214, "\u0192": 196, "\u0401": 221,
+                "\u0402": 171, "\u0403": 174, "\u0404": 184, "\u0405": 193, "\u0406": 167,
+                "\u0407": 186, "\u0408": 183, "\u0409": 188, "\u040a": 190, "\u040b": 203,
+                "\u040c": 205, "\u040e": 216, "\u040f": 218, "\u0410": 128, "\u0411": 129,
+                "\u0412": 130, "\u0413": 131, "\u0414": 132, "\u0415": 133, "\u0416": 134,
+                "\u0417": 135, "\u0418": 136, "\u0419": 137, "\u041a": 138, "\u041b": 139,
+                "\u041c": 140, "\u041d": 141, "\u041e": 142, "\u041f": 143, "\u0420": 144,
+                "\u0421": 145, "\u0422": 146, "\u0423": 147, "\u0424": 148, "\u0425": 149,
+                "\u0426": 150, "\u0427": 151, "\u0428": 152, "\u0429": 153, "\u042a": 154,
+                "\u042b": 155, "\u042c": 156, "\u042d": 157, "\u042e": 158, "\u042f": 159,
+                "\u0430": 224, "\u0431": 225, "\u0432": 226, "\u0433": 227, "\u0434": 228,
+                "\u0435": 229, "\u0436": 230, "\u0437": 231, "\u0438": 232, "\u0439": 233,
+                "\u043a": 234, "\u043b": 235, "\u043c": 236, "\u043d": 237, "\u043e": 238,
+                "\u043f": 239, "\u0440": 240, "\u0441": 241, "\u0442": 242, "\u0443": 243,
+                "\u0444": 244, "\u0445": 245, "\u0446": 246, "\u0447": 247, "\u0448": 248,
+                "\u0449": 249, "\u044a": 250, "\u044b": 251, "\u044c": 252, "\u044d": 253,
+                "\u044e": 254, "\u044f": 223, "\u0451": 222, "\u0452": 172, "\u0453": 175,
+                "\u0454": 185, "\u0455": 207, "\u0456": 180, "\u0457": 187, "\u0458": 192,
+                "\u0459": 189, "\u045a": 191, "\u045b": 204, "\u045c": 206, "\u045e": 217,
+                "\u045f": 219, "\u0490": 162, "\u0491": 182, "\u2013": 208, "\u2014": 209,
+                "\u2018": 212, "\u2019": 213, "\u201c": 210, "\u201d": 211, "\u201e": 215,
+                "\u2020": 160, "\u2022": 165, "\u2026": 201, "\u20ac": 255, "\u2116": 220,
+                "\u2122": 170, "\u2206": 198, "\u221a": 195, "\u221e": 176, "\u2248": 197,
+                "\u2260": 173, "\u2264": 178, "\u2265": 179
+            };
+
+            // ============ DOM 元素 ============
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            const toMojibakeBtn = document.getElementById('toMojibakeBtn');
+            const toChineseBtn = document.getElementById('toChineseBtn');
+            const swapBtn = document.getElementById('swapBtn');
+            const clearBtn = document.getElementById('clearBtn');
+
+            // ============ 转换函数 ============
+            // 中文 -> 乱码
+            function toMojibake(text) {
+                const utf8Bytes = new TextEncoder().encode(text);
+                let result = '';
+                for (const byte of utf8Bytes) {
+                    result += macCyrillicByteToChar[byte] || '';
+                }
+                return result;
+            }
+
+            // 乱码 -> 中文
+            function toChinese(text) {
+                const bytes = [];
+                for (const ch of text) {
+                    const code = ch.codePointAt(0);
+                    if (code < 128) {
+                        // ASCII 字符直接保留原始字节
+                        bytes.push(code);
+                    } else {
+                        const byte = macCyrillicCharToByte[ch];
+                        if (byte !== undefined) {
+                            bytes.push(byte);
+                        }
+                        // 未知字符忽略（可选：可以按 UTF-8 编码处理，但会造成不可逆）
+                    }
+                }
+                const byteArray = new Uint8Array(bytes);
+                return new TextDecoder('utf-8').decode(byteArray);
+            }
+
+            // ============ 事件绑定 ============
+            toMojibakeBtn.addEventListener('click', () => {
+                outputText.value = toMojibake(inputText.value);
+            });
+
+            toChineseBtn.addEventListener('click', () => {
+                outputText.value = toChinese(inputText.value);
+            });
+
+            swapBtn.addEventListener('click', () => {
+                const temp = inputText.value;
+                inputText.value = outputText.value;
+                outputText.value = temp;
+            });
+
+            clearBtn.addEventListener('click', () => {
+                inputText.value = '';
+                outputText.value = '';
+                inputText.focus();
+            });
+        })();
+    </script>
+</body>
+</html>
