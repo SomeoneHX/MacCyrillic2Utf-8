@@ -4,321 +4,236 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>中文 ⇆ 乱码 双向转换器</title>
-    <!-- Font Awesome 6 CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root {
-            --bg: #f5f7fb;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --text-secondary: #64748b;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --border: #e2e8f0;
-            --radius: 16px;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08);
-            --transition: 0.25s ease;
+            --bg: #f2f4f7;
+            --panel: #ffffff;
+            --border: #e4e7ec;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --primary: #2563eb;
         }
 
-        * {
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
             margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            overflow: hidden;
         }
 
         body {
-            background-color: var(--bg);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
             color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                         "Helvetica Neue", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #app { height: 100%; }
+
+        /* ===== 整体布局：撑满视口 ===== */
+        .app-shell {
+            height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
+            min-width: 720px;
+            overflow: hidden;
+        }
+
+        /* ===== 顶栏 ===== */
+        .topbar {
+            flex: none;
+            height: 52px;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 2rem 1rem;
-            line-height: 1.6;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 0 16px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
         }
 
-        .container {
-            width: 100%;
-            max-width: 900px;
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 2rem 2.5rem;
-            transition: box-shadow var(--transition);
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
         }
 
-        .container:hover {
-            box-shadow: var(--shadow-hover);
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        header h1 {
-            font-size: 2rem;
+        .brand .logo {
+            flex: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 5px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 14px;
             font-weight: 700;
-            letter-spacing: -0.5px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.75rem;
+            user-select: none;
         }
 
-        header h1 i {
-            color: var(--primary);
-            font-size: 2rem;
-        }
-
-        header p {
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-            font-size: 1rem;
-        }
-
-        .converter {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .input-group, .output-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        label {
+        .brand .title {
+            font-size: 15px;
             font-weight: 600;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            letter-spacing: .2px;
+            white-space: nowrap;
         }
 
-        label i {
-            color: var(--primary);
+        .brand .sub {
+            font-size: 12px;
+            color: var(--muted);
+            padding-left: 10px;
+            margin-left: 4px;
+            border-left: 1px solid var(--border);
+            white-space: nowrap;
         }
 
-        textarea {
+        /* ===== 主工作区：关键改动 ===== */
+        .panes {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 12px 16px;
+            max-width: 1800px;
             width: 100%;
-            min-height: 140px;
-            resize: vertical;
-            padding: 1rem;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color var(--transition), box-shadow var(--transition);
-            background: #fafbfc;
-            color: var(--text);
+            margin: 0 auto;
+            overflow: hidden;
         }
 
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-
-        .actions {
+        .pane {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-            justify-content: center;
-            margin-top: 0.5rem;
+            flex-direction: column;
+            min-width: 0;
+            min-height: 0;          /* 允许内部 flex 子项收缩 */
         }
 
-        .btn {
-            display: inline-flex;
+        .pane-head {
+            flex: none;
+            display: flex;
             align-items: center;
-            gap: 0.6rem;
-            padding: 0.7rem 1.5rem;
-            border-radius: 999px;
-            font-size: 0.95rem;
+            justify-content: space-between;
+            padding: 0 2px 6px;
+            font-size: 13px;
+            color: var(--text);
+            gap: 8px;
+        }
+
+        .pane-head-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pane-title {
             font-weight: 600;
-            cursor: pointer;
-            transition: background-color var(--transition), transform var(--transition), box-shadow var(--transition);
-            border: none;
-            color: white;
-            background-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .btn:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+        .pane-title::before {
+            content: "";
+            width: 3px;
+            height: 12px;
+            border-radius: 2px;
+            background: var(--primary);
         }
 
-        .btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        .pane-meta {
+            font-size: 12px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
         }
 
-        .btn.secondary {
-            background-color: #f1f5f9;
-            color: #334155;
-            box-shadow: none;
+        /* ===== 关键：让 n-input 作为 flex item 自动撑满 ===== */
+        .pane > .n-input {
+            flex: 1;
+            min-height: 0;
         }
 
-        .btn.secondary:hover {
-            background-color: #e2e8f0;
-            box-shadow: none;
+        /* 等宽字体仅作用于 textarea 内部，不做 padding 覆盖 */
+        .pane .n-input__textarea-el {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas,
+                         "Liberation Mono", "Courier New", monospace;
+            font-size: 13.5px;
+            line-height: 1.65;
         }
 
-        .btn i {
-            font-size: 1rem;
-        }
-
-        .info {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
+        /* ===== 底部说明 ===== */
+        .footnote {
+            flex: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 8px 16px;
+            background: var(--panel);
             border-top: 1px solid var(--border);
+            font-size: 12.5px;
+            color: var(--muted);
         }
 
-        .info h2 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .footnote .note {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .info h2 i {
-            color: var(--primary);
-        }
-
-        .info p {
-            color: var(--text-secondary);
-            margin-bottom: 0.8rem;
-            font-size: 0.95rem;
-        }
-
-        .info code {
+        .footnote code {
             background: #f1f5f9;
-            padding: 0.15rem 0.4rem;
-            border-radius: 6px;
-            font-size: 0.9em;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 0 4px;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 12px;
             color: #0f172a;
         }
 
-        .related-link {
-            margin-top: 1.5rem;
+        .link {
+            flex: none;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .link:hover { text-decoration: underline; }
+
+        .boot {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 14px;
             text-align: center;
-        }
-
-        .related-link .btn {
-            background-color: #10b981;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-        }
-
-        .related-link .btn:hover {
-            background-color: #059669;
-            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 1.5rem 1.2rem;
-            }
-
-            header h1 {
-                font-size: 1.5rem;
-            }
-
-            .actions {
-                flex-direction: column;
-            }
-
-            .btn {
-                justify-content: center;
-            }
+            padding: 0 24px;
         }
     </style>
+
+    <!-- Vue 3 UMD -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js"></script>
+    <!-- Naive UI UMD -->
+    <script src="https://cdn.jsdelivr.net/npm/naive-ui@2.42.0/dist/index.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>
-                <i class="fa-solid fa-arrows-rotate"></i>
-                中文 ⇆ 乱码 双向转换器
-            </h1>
-            <p>UTF-8 中文与 MacCyrillic 乱码互转，轻松还原“伪西里尔”文字</p>
-        </header>
-
-        <div class="converter">
-            <div class="input-group">
-                <label for="inputText">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    输入文本
-                </label>
-                <textarea id="inputText" placeholder="在此输入正常中文或乱码..."></textarea>
-            </div>
-
-            <div class="actions">
-                <button class="btn" id="toMojibakeBtn" title="将中文编码为 MacCyrillic 乱码">
-                    <i class="fa-solid fa-arrow-right"></i>
-                    转为乱码
-                </button>
-                <button class="btn" id="toChineseBtn" title="将乱码还原为中文">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    转为中文
-                </button>
-                <button class="btn secondary" id="swapBtn" title="交换输入输出内容">
-                    <i class="fa-solid fa-arrow-up"></i>
-                    交换
-                </button>
-                <button class="btn secondary" id="clearBtn" title="清空所有文本框">
-                    <i class="fa-solid fa-eraser"></i>
-                    清空
-                </button>
-            </div>
-
-            <div class="output-group">
-                <label for="outputText">
-                    <i class="fa-solid fa-file-lines"></i>
-                    输出结果
-                </label>
-                <textarea id="outputText" placeholder="转换结果将显示在这里..." readonly></textarea>
-            </div>
-        </div>
-
-        <div class="info">
-            <h2>
-                <i class="fa-solid fa-circle-info"></i>
-                关于本工具
-            </h2>
-            <p>
-                本工具用于在<strong>正常 UTF-8 中文</strong>与<strong> MacCyrillic 编码误读产生的乱码</strong>之间进行双向转换。
-                当 UTF-8 编码的中文字节被错误地按照 MacCyrillic 编码解读时，就会显示为诸如 <code>жЬЙдїїдљХ</code> 这样的“伪西里尔”乱码。
-            </p>
-            <p>
-                转换原理：中文文本先经 UTF-8 编码为字节序列，再使用 MacCyrillic 单字节解码，即可得到乱码；反之，将乱码字符映射回 MacCyrillic 字节，再用 UTF-8 解码，即可还原为中文。
-            </p>
-            <p>
-                这种乱码常见于早期 Mac 系统或某些编码检测错误的场景。只要字节未被破坏，通常都能无损还原。
-            </p>
-
-            <div class="related-link">
-                <a href="https://www.luogu.com.cn/discuss/1359611" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-                    <button class="btn">
-                        <i class="fa-solid fa-book-open"></i>
-                        前情提要
-                    </button>
-                </a>
-            </div>
-        </div>
+    <div id="app">
+        <div class="boot">正在加载界面…<br><small>如长时间无响应，请检查网络或 CDN 可用性</small></div>
     </div>
 
     <script>
-        (function() {
-            // ============ MacCyrillic 映射表（硬编码，避免依赖 TextDecoder） ============
-            // MacCyrillic 字节 -> 字符 映射表（用于中文转乱码）
+        (function () {
+            "use strict";
+
+            /* ================= MacCyrillic 映射表 ================= */
+
             const macCyrillicByteToChar = {
                 0: "\u0000", 1: "\u0001", 2: "\u0002", 3: "\u0003", 4: "\u0004", 5: "\u0005",
                 6: "\u0006", 7: "\u0007", 8: "\u0008", 9: "\u0009", 10: "\u000a", 11: "\u000b",
@@ -366,7 +281,6 @@
                 253: "\u044d", 254: "\u044e", 255: "\u20ac"
             };
 
-            // MacCyrillic 字符 -> 字节 映射表（用于乱码转中文）
             const macCyrillicCharToByte = {
                 "\u0000": 0, "\u0001": 1, "\u0002": 2, "\u0003": 3, "\u0004": 4, "\u0005": 5,
                 "\u0006": 6, "\u0007": 7, "\u0008": 8, "\u0009": 9, "\u000a": 10, "\u000b": 11,
@@ -414,65 +328,195 @@
                 "\u2260": 173, "\u2264": 178, "\u2265": 179
             };
 
-            // ============ DOM 元素 ============
-            const inputText = document.getElementById('inputText');
-            const outputText = document.getElementById('outputText');
-            const toMojibakeBtn = document.getElementById('toMojibakeBtn');
-            const toChineseBtn = document.getElementById('toChineseBtn');
-            const swapBtn = document.getElementById('swapBtn');
-            const clearBtn = document.getElementById('clearBtn');
+            /* ================= 转换核心 ================= */
 
-            // ============ 转换函数 ============
-            // 中文 -> 乱码
-            function toMojibake(text) {
+            function encodeToMojibake(text) {
                 const utf8Bytes = new TextEncoder().encode(text);
-                let result = '';
-                for (const byte of utf8Bytes) {
-                    result += macCyrillicByteToChar[byte] || '';
+                let result = "";
+                for (let i = 0; i < utf8Bytes.length; i++) {
+                    const ch = macCyrillicByteToChar[utf8Bytes[i]];
+                    result += ch !== undefined ? ch : "";
                 }
                 return result;
             }
 
-            // 乱码 -> 中文
-            function toChinese(text) {
+            function decodeFromMojibake(text) {
                 const bytes = [];
                 for (const ch of text) {
                     const code = ch.codePointAt(0);
                     if (code < 128) {
-                        // ASCII 字符直接保留原始字节
                         bytes.push(code);
-                    } else {
-                        const byte = macCyrillicCharToByte[ch];
-                        if (byte !== undefined) {
-                            bytes.push(byte);
-                        }
-                        // 未知字符忽略（可选：可以按 UTF-8 编码处理，但会造成不可逆）
+                        continue;
                     }
+                    const byte = macCyrillicCharToByte[ch];
+                    if (byte !== undefined) bytes.push(byte);
                 }
-                const byteArray = new Uint8Array(bytes);
-                return new TextDecoder('utf-8').decode(byteArray);
+                return new TextDecoder("utf-8", { fatal: false }).decode(new Uint8Array(bytes));
             }
 
-            // ============ 事件绑定 ============
-            toMojibakeBtn.addEventListener('click', () => {
-                outputText.value = toMojibake(inputText.value);
+            /* ================= Vue 应用 ================= */
+
+            const { createApp, ref } = Vue;
+            const { NConfigProvider, NButton, NInput, NSpace } = naive;
+
+            let messageApi = null;
+            try {
+                messageApi = naive.createDiscreteApi(["message"]).message;
+            } catch (e) {
+                console.warn("createDiscreteApi 不可用", e);
+            }
+
+            const app = createApp({
+                setup() {
+                    const input = ref("");
+                    const output = ref("");
+
+                    const themeOverrides = {
+                        common: {
+                            primaryColor: "#2563eb",
+                            primaryColorHover: "#1d4ed8",
+                            primaryColorPressed: "#1e40af",
+                            borderRadius: "4px",
+                            borderRadiusSmall: "3px",
+                            fontSize: "14px",
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", Arial, sans-serif'
+                        },
+                        Button: {
+                            borderRadiusTiny: "3px",
+                            borderRadiusSmall: "3px",
+                            borderRadiusMedium: "4px",
+                            borderRadiusLarge: "5px",
+                            fontWeight: "500"
+                        },
+                        Input: { borderRadius: "4px" }
+                    };
+
+                    const toMojibake = () => {
+                        output.value = encodeToMojibake(input.value);
+                    };
+
+                    const toChinese = () => {
+                        output.value = decodeFromMojibake(input.value);
+                    };
+
+                    const swap = () => {
+                        const tmp = input.value;
+                        input.value = output.value;
+                        output.value = tmp;
+                    };
+
+                    const clear = () => {
+                        input.value = "";
+                        output.value = "";
+                    };
+
+                    const copyOutput = async () => {
+                        if (!output.value) return;
+                        try {
+                            if (navigator.clipboard && window.isSecureContext) {
+                                await navigator.clipboard.writeText(output.value);
+                            } else {
+                                const ta = document.createElement("textarea");
+                                ta.value = output.value;
+                                ta.style.position = "fixed";
+                                ta.style.top = "-9999px";
+                                document.body.appendChild(ta);
+                                ta.select();
+                                document.execCommand("copy");
+                                document.body.removeChild(ta);
+                            }
+                            if (messageApi) messageApi.success("已复制到剪贴板");
+                        } catch (err) {
+                            console.error(err);
+                            if (messageApi) messageApi.error("复制失败，请手动选择复制");
+                        }
+                    };
+
+                    return {
+                        input, output, themeOverrides,
+                        toMojibake, toChinese, swap, clear, copyOutput
+                    };
+                },
+                template: `
+                    <n-config-provider :theme-overrides="themeOverrides">
+                        <div class="app-shell">
+                            <header class="topbar">
+                                <div class="brand">
+                                    <span class="logo">⇄</span>
+                                    <span class="title">中文 ⇆ 乱码 双向转换器</span>
+                                    <span class="sub">UTF-8 ⇄ MacCyrillic</span>
+                                </div>
+                                <n-space :size="8" align="center" :wrap="false">
+                                    <n-button type="primary" size="small" @click="toMojibake">
+                                        转为乱码 →
+                                    </n-button>
+                                    <n-button type="primary" size="small" ghost @click="toChinese">
+                                        转为中文 →
+                                    </n-button>
+                                    <n-button size="small" secondary @click="swap">交换</n-button>
+                                    <n-button size="small" secondary @click="clear">清空</n-button>
+                                </n-space>
+                            </header>
+
+                            <main class="panes">
+                                <section class="pane">
+                                    <div class="pane-head">
+                                        <span class="pane-title">输入文本</span>
+                                        <div class="pane-head-right">
+                                            <span class="pane-meta">{{ input.length }} 字符</span>
+                                        </div>
+                                    </div>
+                                    <n-input
+                                        v-model:value="input"
+                                        type="textarea"
+                                        :autosize="{ minRows: 6, maxRows: 999 }"
+                                        placeholder="在此输入正常中文，或粘贴 MacCyrillic 乱码…"
+                                    />
+                                </section>
+
+                                <section class="pane">
+                                    <div class="pane-head">
+                                        <span class="pane-title">输出结果</span>
+                                        <div class="pane-head-right">
+                                            <span class="pane-meta">{{ output.length }} 字符</span>
+                                            <n-button
+                                                size="tiny"
+                                                secondary
+                                                :disabled="!output"
+                                                @click="copyOutput"
+                                            >复制</n-button>
+                                        </div>
+                                    </div>
+                                    <n-input
+                                        v-model:value="output"
+                                        type="textarea"
+                                        :autosize="{ minRows: 6, maxRows: 999 }"
+                                        readonly
+                                        placeholder="转换结果将显示在这里…"
+                                    />
+                                </section>
+                            </main>
+
+                            <footer class="footnote">
+                                <span class="note">
+                                    原理：中文经 UTF-8 编码为字节序列，再按 MacCyrillic 单字节解码即得 <code>жЬЙдїїдљХ</code> 这类“伪西里尔”乱码；反向映射即可无损还原。
+                                </span>
+                                <a class="link"
+                                   href="https://www.luogu.com.cn/discuss/1359611"
+                                   target="_blank"
+                                   rel="noopener noreferrer">前情提要 ↗</a>
+                            </footer>
+                        </div>
+                    </n-config-provider>
+                `
             });
 
-            toChineseBtn.addEventListener('click', () => {
-                outputText.value = toChinese(inputText.value);
-            });
+            app.component("NConfigProvider", NConfigProvider);
+            app.component("NButton", NButton);
+            app.component("NInput", NInput);
+            app.component("NSpace", NSpace);
 
-            swapBtn.addEventListener('click', () => {
-                const temp = inputText.value;
-                inputText.value = outputText.value;
-                outputText.value = temp;
-            });
-
-            clearBtn.addEventListener('click', () => {
-                inputText.value = '';
-                outputText.value = '';
-                inputText.focus();
-            });
+            app.mount("#app");
         })();
     </script>
 </body>
