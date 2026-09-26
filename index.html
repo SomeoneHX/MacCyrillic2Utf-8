@@ -341,7 +341,17 @@
             }
 
             function decodeFromMojibake(text) {
-                const bytes = [];
+                let result = "";
+                let bytes = [];
+            
+                const flushBytes = () => {
+                    if (bytes.length > 0) {
+                        result += new TextDecoder("utf-8", { fatal: false })
+                            .decode(new Uint8Array(bytes));
+                        bytes = [];
+                    }
+                };
+            
                 for (const ch of text) {
                     const code = ch.codePointAt(0);
                     if (code < 128) {
@@ -349,9 +359,16 @@
                         continue;
                     }
                     const byte = macCyrillicCharToByte[ch];
-                    if (byte !== undefined) bytes.push(byte);
+                    if (byte !== undefined) {
+                        bytes.push(byte);
+                    } else {
+                        // 遇到无法映射的字符：先把已积累的字节流解码，再原样保留该字符
+                        flushBytes();
+                        result += ch;
+                    }
                 }
-                return new TextDecoder("utf-8", { fatal: false }).decode(new Uint8Array(bytes));
+                flushBytes();
+                return result;
             }
 
             /* ================= Vue 应用 ================= */
